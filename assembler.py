@@ -5,9 +5,13 @@ from gen_bytecode import *
 
 def main():
     inst_list = []
-    with open(input_filename) as f:
+    with open(input_filename,encoding="utf-8") as f:
         for inst in f:
-            temp = inst.replace("\n","").split(",")
+            temp = inst.replace("\n","").split("#")
+            if len(temp) >= 2:
+                temp = temp[0].split(",")
+            else:
+                temp = temp[0].split(",")
             inst = temp[0].split(" ")
             op = temp[1:]
             op.insert(0,inst[1])
