@@ -1,3 +1,7 @@
+a.txt
+*_rtl.txt
+*.asm
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

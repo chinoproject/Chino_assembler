@@ -120,8 +120,8 @@ if  __name__ == "__main__":
             for i in var_list:
                 print(i)
         elif cmd[:4] == "show":
-            x = cmd.split(" ")
-            print(var_list[x[1]])
+            x = cmd[4:]
+            print(var_list[x])
         elif cmd == "calc":
             calc()
         elif cmd == "exit":

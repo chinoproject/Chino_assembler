@@ -7,6 +7,8 @@ def main():
     inst_list = []
     with open(input_filename,encoding="utf-8") as f:
         for inst in f:
+            if inst.replace("\t","").replace(" ","")[0] == "#": #跳过注释
+                continue
             temp = inst.replace("\n","").split("#")
             if len(temp) >= 2:
                 temp = temp[0].split(",")
