@@ -41,18 +41,45 @@ class InstType:
         text  = self.inst + "\n" + "bytecode:" + str(self.bytecode)
         return text
 class TypeRI(InstType):
-    def __init__(self,inst,reg1,reg2,imm):
+    def __init__(self,inst,reg1,op2,imm=None):
         self.raw_inst = inst
-        self.inst = inst[:] + "ri " + str(reg1) + "," + str(reg2) + "," + str(imm)
-        self.text_dict = {"or":0x2010000000000000,"and":0x2020000000000000}
-        self.bytecode = str(hex(self.text_dict[inst] | set_reg1(reg1) | set_reg2(reg2) | set_imm(imm)))
+        self.text_dict = {"or":0x2010000000000000,"and":0x2020000000000000,"xor":0x2030000000000000,"not":0x2040000000000000,"shl":0x2050000000000000,\
+                        "shr":0x2060000000000000}
+
+        if imm:
+            if inst == "shl" or inst == "shr":
+                self.bytecode = hex(self.text_dict[inst] | set_reg1(reg1) | set_reg2(op2) | set_reg3("$" + imm))
+            else:
+                self.bytecode = hex(self.text_dict[inst] | set_reg1(reg1) | set_reg2(op2) | set_imm(imm))
+            self.inst = inst[:] + str(reg1) + "," + str(op2) + "," + str(imm)
+        else:
+            self.bytecode = hex(self.text_dict[inst] | set_reg1(reg1) | shift_n(check_par(op2),16,2**32))
+            self.inst = inst[:] + str(reg1) + "," + str(op2)
+
         self.bin_bytecode = int(self.bytecode,base=16)
 
 class TypeRR(InstType):
-    def __init__(self,inst,reg1,reg2,reg3):
+    def __init__(self,inst,reg1,reg2,reg3=None):
         self.raw_inst = inst
-        self.raw_inst = inst[:] + "rr" + str(reg1) + "," + str(reg2) + "," + str(reg3)
-        self.text_dict = {"or":0x1010000000000000,"and":0x1020000000000000}
+        if reg3:
+            self.raw_inst = inst[:] + str(reg1) + "," + str(reg2) + "," + str(reg3)
+        else:
+            self.raw_inst = inst[:] + str(reg1) + "," + str(reg2)
+            reg3 = "$0"
+
+        self.text_dict = {"or":0x1010000000000000,"and":0x1020000000000000,"xor":0x1030000000000000,"not":0x1040000000000000,"shl":0x1050000000000000,\
+                        "shr":0x1060000000000000}
         self.bytecode = str(hex(self.text_dict[inst] | set_reg1(reg1) | set_reg2(reg2) | set_reg3(reg3)))
         self.bin_bytecode = int(self.bytecode,base=16)
 
+def bytecode(inst,op1,op2,op3=None):
+    if op3 == None:
+        if op2[0] == '$':
+            return TypeRR(inst,op1,op2).bytecode
+        else:
+            return TypeRI(inst,op1,op2).bytecode
+    else:
+        if op3[0] == '$':
+            return TypeRR(inst,op1,op2,op3).bytecode
+        else:
+            return TypeRI(inst,op1,op2,op3).bytecode

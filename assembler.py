@@ -7,7 +7,9 @@ def main():
     inst_list = []
     with open(input_filename,encoding="utf-8") as f:
         for inst in f:
-            if inst.replace("\t","").replace(" ","")[0] == "#": #跳过注释
+            if len(inst.replace("\n","").replace("\t","")) == 0:
+                continue
+            if inst.replace("\t","").replace("\n","").replace(" ","")[0] == "#": #跳过注释
                 continue
             temp = inst.replace("\n","").split("#")
             if len(temp) >= 2:
@@ -17,13 +19,10 @@ def main():
             inst = temp[0].split(" ")
             op = temp[1:]
             op.insert(0,inst[1])
-            hex_str = ""
-
-            if inst[0][-2:] == "ri":
-                hex_str = TypeRI(inst[0][:-2],op[0],op[1],op[2]).bytecode
-            elif inst[0][-2:] == "rr":
-                hex_str = TypeRR(inst[0][:-2],op[0],op[1],op[2]).bytecode
-
+            if len(op) == 3:
+                hex_str = bytecode(inst[0],op[0],op[1],op[2])
+            elif len(op) == 2:
+                hex_str = bytecode(inst[0],op[0],op[1])
             inst_list.append(hex_str)
     if output_hex:
         with open(output_filename,"w+") as f:
