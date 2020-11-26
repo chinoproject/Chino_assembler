@@ -1,7 +1,7 @@
 import sys
 from arg import *
 import struct
-from gen_bytecode import *
+from gen_bytecode import bytecode
 
 def main():
     inst_list = []

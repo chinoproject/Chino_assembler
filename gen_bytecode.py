@@ -44,7 +44,7 @@ class TypeRI(InstType):
     def __init__(self,inst,reg1,op2,imm=None):
         self.raw_inst = inst
         self.text_dict = {"or":0x2010000000000000,"and":0x2020000000000000,"xor":0x2030000000000000,"not":0x2040000000000000,"shl":0x2050000000000000,\
-                        "shr":0x2060000000000000,"sar":0x2070000000000000}
+                        "shr":0x2060000000000000,"sar":0x2070000000000000,"mov":0x2080000000000000,"movz":0x2090000000000000,"movn":0x20a0000000000000}
         spec_list = {"sar":True,"shl":True,"shr":True}
         if imm:
             if spec_list.get(inst):
@@ -68,7 +68,7 @@ class TypeRR(InstType):
             reg3 = "$0"
 
         self.text_dict = {"or":0x1010000000000000,"and":0x1020000000000000,"xor":0x1030000000000000,"not":0x1040000000000000,"shl":0x1050000000000000,\
-                        "shr":0x1060000000000000,"sar":0x1070000000000000}
+                        "shr":0x1060000000000000,"sar":0x1070000000000000,"mov":0x1080000000000000,"movz":0x1090000000000000,"movn":0x10a0000000000000}
         self.bytecode = str(hex(self.text_dict[inst] | set_reg1(reg1) | set_reg2(reg2) | set_reg3(reg3)))
         self.bin_bytecode = int(self.bytecode,base=16)
 
