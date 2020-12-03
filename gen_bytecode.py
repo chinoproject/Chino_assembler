@@ -14,7 +14,7 @@ def check_par(v):
         raise TypeError
 
 def shift_n(v,n,max_value):
-    if v < max_value:
+    if v <= max_value:
         return v << n
     else:
         raise IndexError
@@ -60,6 +60,7 @@ class TypeRI(InstType):
                 n = check_par(op2)
                 if n < 0:
                     n = n & 0xffffffff
+                    print(n)
                 self.bytecode = hex(self.text_dict[inst] | set_reg1(reg1) | shift_n(n,15,(2**32)-1))
             else:
                 self.bytecode = hex(self.text_dict[inst] | set_reg1(reg1) | shift_n(check_par(op2),16,2**32))
