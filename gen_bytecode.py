@@ -45,9 +45,10 @@ class TypeRI(InstType):
         self.raw_inst = inst
         self.text_dict = {"or":0x2010000000000000,"and":0x2020000000000000,"xor":0x2030000000000000,"not":0x2040000000000000,"shl":0x2050000000000000,\
                         "shr":0x2060000000000000,"sar":0x2070000000000000,"mov":0x2080000000000000,"movz":0x2090000000000000,"movn":0x20a0000000000000,\
-                        "add":0x20b0000000000000,"sub":0x20c0000000000000,"mult":0x20d0000000000000,"multu":0x20f0000000000000}
+                        "add":0x20b0000000000000,"sub":0x20c0000000000000,"mult":0x20d0000000000000,"div":0x20e0000000000000,"multu":0x20f0000000000000,\
+                        "divu":0x2100000000000000}
         spec_list = {"sar":True,"shl":True,"shr":True}
-        spec2_list = {"mov":True,"mult":True,"multu":True}
+        spec2_list = {"mov":True,"mult":True,"multu":True,"div":True,"divu":True}
         if imm:
             if spec_list.get(inst):
                 self.bytecode = hex(self.text_dict[inst] | set_reg1(reg1) | set_reg2(op2) | set_reg3("$" + imm))
@@ -58,8 +59,8 @@ class TypeRI(InstType):
             if spec2_list.get(inst):
                 n = check_par(op2)
                 if n < 0:
-                    n = 1 << 31 | abs(n)
-                self.bytecode = hex(self.text_dict[inst] | set_reg1(reg1) | shift_n(n,15,(2**31)-1))
+                    n = n & 0xffffffff
+                self.bytecode = hex(self.text_dict[inst] | set_reg1(reg1) | shift_n(n,15,(2**32)-1))
             else:
                 self.bytecode = hex(self.text_dict[inst] | set_reg1(reg1) | shift_n(check_par(op2),16,2**32))
             self.inst = inst[:] + str(reg1) + "," + str(op2)
@@ -77,7 +78,8 @@ class TypeRR(InstType):
 
         self.text_dict = {"or":0x1010000000000000,"and":0x1020000000000000,"xor":0x1030000000000000,"not":0x1040000000000000,"shl":0x1050000000000000,\
                         "shr":0x1060000000000000,"sar":0x1070000000000000,"mov":0x1080000000000000,"movz":0x1090000000000000,"movn":0x10a0000000000000,\
-                        "add":0x10b0000000000000,"sub":0x10c0000000000000,"mult":0x10d0000000000000,"multu":0x10f0000000000000}
+                        "add":0x10b0000000000000,"sub":0x10c0000000000000,"mult":0x10d0000000000000,"div":0x10e0000000000000,"multu":0x10f0000000000000,\
+                        "divu":0x1100000000000000}
         self.bytecode = str(hex(self.text_dict[inst] | set_reg1(reg1) | set_reg2(reg2) | set_reg3(reg3)))
         self.bin_bytecode = int(self.bytecode,base=16)
 
