@@ -1,7 +1,7 @@
 import sys
 from arg import *
 import struct
-from gen_bytecode import bytecode
+from gen_bytecode import bytecode,check_par
 lineno = 1
 tag_to_addr = {}
 postpone_calc = {}
@@ -30,7 +30,7 @@ def main():
             if inst[0][-1] == ':':
                 #有标号
                 if lineno == 1:
-                    tag_to_addr[inst[9][:-1]] = 0
+                    tag_to_addr[inst[0][:-1]] = 0
                 else:
                     tag_to_addr[inst[0][:-1]] = 8*(lineno)   #计算跳转地址
                 print(inst[0])
@@ -41,22 +41,31 @@ def main():
                 flag = True
 
             op = temp[1:]
+            if inst[0] == "ret":
+                inst_list.append("0x4190000000000000")
+                continue
             op.insert(0,inst[1])
             inst = inst[0]
-            if inst == "jmp":
+            if inst == "jmp" or inst == "call":
                 if op[0][0] != '$':
                     try:
                         op[0] = tag_to_addr[op[0]]
                     except:
                         postpone_calc[lineno - 1] = [inst,op]
                         continue
-            elif jump_inst.get(inst):
+                else:
+                    op.append("$0")
+            else:
                 try:
-                    op[-1] = tag_to_addr[op[-1]]
+                    if not (op[-1][0] == '$' or (check_par(op[-1]) + 1)):
+                        op[-1] = tag_to_addr[op[-1]]
+
                 except:
                     postpone_calc[lineno - 1] = [inst,op]
                     continue
-
+            if inst == "loop":
+                if op[0][0] == '$':
+                    op.append("$0")
             if len(op) == 3:
                 hex_str = bytecode(inst,op[0],op[1],op[2])
             elif len(op) == 2:
@@ -66,6 +75,7 @@ def main():
     for i in postpone_calc:
         inst = postpone_calc[i][0]
         op = postpone_calc[i][1]
+        print(op)
         op[-1] = str(tag_to_addr[op[-1]])
         if len(op) < 2:
             op.append("0")
