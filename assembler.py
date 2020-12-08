@@ -2,7 +2,8 @@ import sys
 from arg import *
 import struct
 from gen_bytecode import bytecode,check_par
-lineno = 1
+inst_lineno = 0
+lineno = 0
 tag_to_addr = {}
 postpone_calc = {}
 jump_inst = {"jng":True,"jg":True,"jnl":True,"jl":True,"je":True,"jne":True}
@@ -11,6 +12,7 @@ def main():
     global lineno
     global tag_to_addr
     global postpone_calc
+    global inst_lineno
     flag = False
     with open(input_filename,encoding="utf-8") as f:
         for inst in f:
@@ -27,19 +29,17 @@ def main():
 
             inst = temp[0].split(" ")
             print(inst)
+            lineno = lineno + 1
             if inst[0][-1] == ':':
                 #有标号
                 if lineno == 1:
                     tag_to_addr[inst[0][:-1]] = 0
                 else:
-                    tag_to_addr[inst[0][:-1]] = 8*(lineno)   #计算跳转地址
+                    tag_to_addr[inst[0][:-1]] = 8*(inst_lineno)   #计算跳转地址
                 print(inst[0])
                 continue
             else:
-                if lineno != 1 or flag:
-                    lineno = lineno + 1
-                flag = True
-
+                inst_lineno = inst_lineno + 1
             op = temp[1:]
             if inst[0] == "ret":
                 inst_list.append("0x4190000000000000")
@@ -51,7 +51,7 @@ def main():
                     try:
                         op[0] = tag_to_addr[op[0]]
                     except:
-                        postpone_calc[lineno - 1] = [inst,op]
+                        postpone_calc[inst_lineno] = [inst,op]
                         continue
                 else:
                     op.append("$0")
@@ -61,7 +61,7 @@ def main():
                         op[-1] = tag_to_addr[op[-1]]
 
                 except:
-                    postpone_calc[lineno - 1] = [inst,op]
+                    postpone_calc[inst_lineno] = [inst,op]
                     continue
             if inst == "loop":
                 if op[0][0] == '$':
@@ -85,7 +85,7 @@ def main():
         elif len(op) == 2:
             hex_str = bytecode(inst,op[0],op[1])
         
-        inst_list.insert(i,hex_str)
+        inst_list.insert(i - 1,hex_str)
 
     if output_hex:
         with open(output_filename,"w+") as f:
