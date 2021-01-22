@@ -48,7 +48,9 @@ class TypeRI(InstType):
                         "add":0x20b0000000000000,"sub":0x20c0000000000000,"mult":0x20d0000000000000,"div":0x20e0000000000000,"multu":0x20f0000000000000,\
                         "divu":0x2100000000000000,"jmp":0x2110000000000000,"jng":0x2120000000000000,"jg":0x2130000000000000,"jnl":0x2140000000000000,\
                         "jl":0x2150000000000000,"je":0x2160000000000000,"jne":0x2170000000000000,"call":0x2180000000000000,"loop":0x21a0000000000000,\
-                        }
+                        "loadb":0x21b0000000000000,"loadh":0x21c0000000000000,"loadw":0x21d0000000000000,"loadbu":0x21e0000000000000,\
+                        "loadhu":0x21f0000000000000,"storeb":0x2200000000000000,"storeh":0x2210000000000000,"storew":0x2220000000000000,\
+                        "loadwl":0x2230000000000000,"loadwr":0x2240000000000000,"storewl":0x2250000000000000,"storewr":0x2260000000000000}
         spec_list = {"sar":True,"shl":True,"shr":True}
         spec2_list = {"mov":True,"mult":True,"multu":True,"div":True,"divu":True}
         spec3_list = {"jmp":True,"call":True,"loop":True}

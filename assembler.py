@@ -7,6 +7,10 @@ lineno = 0
 tag_to_addr = {}
 postpone_calc = {}
 jump_inst = {"jng":True,"jg":True,"jnl":True,"jl":True,"je":True,"jne":True}
+data_inst = {"loadb":True,"loadh":True,"loadw":True,"loadbu":True,"loadhu":True,
+                "loadwl":True,"loadwr":True,"storeb":True,"storeh":True,"storew":True,
+                "storewl":True,"storewr":True}
+
 def main():
     inst_list = []
     global lineno
