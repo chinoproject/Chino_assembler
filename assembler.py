@@ -30,7 +30,9 @@ def main():
                 temp = temp[0].split(",")   #有注释
             else:
                 temp = temp[0].split(",")   #无注释
-
+            if temp[0] == "nop":
+                inst_list.append("0x0000000000000000")
+                continue
             inst = temp[0].split(" ")
             print(inst)
             lineno = lineno + 1
