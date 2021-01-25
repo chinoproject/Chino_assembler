@@ -56,6 +56,7 @@ def main():
                 if op[0][0] != '$':
                     try:
                         op[0] = tag_to_addr[op[0]]
+                        hex_str = hex(0x2110000000000000 | op[0] << 20)
                     except:
                         postpone_calc[inst_lineno] = [inst,op]
                         continue
