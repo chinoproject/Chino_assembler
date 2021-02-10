@@ -2,6 +2,7 @@ import sys
 from arg import *
 import struct
 from gen_bytecode import bytecode,check_par
+import re
 inst_lineno = 0
 lineno = 0
 tag_to_addr = {}
@@ -10,13 +11,16 @@ jump_inst = {"jng":True,"jg":True,"jnl":True,"jl":True,"je":True,"jne":True}
 data_inst = {"loadb":True,"loadh":True,"loadw":True,"loadbu":True,"loadhu":True,
                 "loadwl":True,"loadwr":True,"storeb":True,"storeh":True,"storew":True,
                 "storewl":True,"storewr":True}
-
+base = 0
+sym_lineno = 0
 def main():
     inst_list = []
     global lineno
     global tag_to_addr
     global postpone_calc
     global inst_lineno
+    global base
+    global sym_lineno
     flag = False
     with open(input_filename,encoding="utf-8") as f:
         for inst in f:
@@ -30,10 +34,28 @@ def main():
                 temp = temp[0].split(",")   #有注释
             else:
                 temp = temp[0].split(",")   #无注释
-            if temp[0] == "nop":
+
+            inst = temp[0]
+            inst = inst[re.search("[a-zA-Z0-9._]",inst).span()[0]:]
+            inst = inst.split(" ")
+
+            if inst[0] == "nop":
                 inst_list.append("0x0000000000000000")
                 continue
-            inst = temp[0].split(" ")
+            elif inst[0] == "eret":
+                inst_list.append("0x42d0000000000000")
+                continue
+            elif inst[0] == "syscall":
+                inst_list.append("0x42c0000000000000")
+                continue
+            elif inst[0] == "trap":
+                inst_list.append("0x42b0000000000000")
+                continue
+            if inst[0][0:4] == ".org":
+                inst_list.append(inst[0] + " " + inst[1])
+                sym_lineno = 0
+                base = int(inst[1],base=16)
+                continue
             print(inst)
             lineno = lineno + 1
             if inst[0][-1] == ':':
@@ -41,11 +63,13 @@ def main():
                 if lineno == 1:
                     tag_to_addr[inst[0][:-1]] = 0
                 else:
-                    tag_to_addr[inst[0][:-1]] = 8*(inst_lineno)   #计算跳转地址
+                    tag_to_addr[inst[0][:-1]] = base + 8*sym_lineno   #计算跳转地址
                 print(inst[0])
                 continue
             else:
                 inst_lineno = inst_lineno + 1
+            sym_lineno += 1
+
             op = temp[1:]
             if inst[0] == "ret":
                 inst_list.append("0x4190000000000000")
@@ -102,11 +126,16 @@ def main():
         with open(output_filename,"wb+") as f:
             for inst in inst_list:
                 f.write(struct.pack(">Q",int(inst,base=16)))
-
+    print(inst_list)
     if rtl_code_gen:
         with open("rtl_" + output_filename,"w+") as f:
+            l = 0
             for i in range(len(inst_list)):
-                f.write("inst_mem[" + str(i) + "]" + " <= " + "64'h" + inst_list[i][2:] + ";\n")
+                if inst_list[i][0:4] == ".org":
+                    l = int(int(inst_list[i][4:],base=16) / 8)
+                    continue
+                f.write("inst_mem[" + str(l) + "]" + " <= " + "64'h" + inst_list[i][2:] + ";\n")
+                l += 1
 
 if __name__ == "__main__":
     main()
